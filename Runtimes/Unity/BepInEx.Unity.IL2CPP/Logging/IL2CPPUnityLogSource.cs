@@ -8,7 +8,7 @@ public class IL2CPPUnityLogSource : ILogSource
 {
     public IL2CPPUnityLogSource()
     {
-        Application.s_LogCallbackHandler = new Action<string, string, LogType>(UnityLogCallback);
+        //Application.s_LogCallbackHandler = new Action<string, string, LogType>(UnityLogCallback);
 
         Il2CppInterop.Runtime.IL2CPP
                      .ResolveICall<
