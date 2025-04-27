@@ -29,7 +29,7 @@ using Il2CppInterop.HarmonySupport;
 using Il2CppInterop.Runtime.Startup;
 using LibCpp2IL;
 using Microsoft.Extensions.Logging;
-using Mono.Cecil;
+using AsmResolver.DotNet;
 using MonoMod.Utils;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 using MSLoggerFactory = Microsoft.Extensions.Logging.LoggerFactory;
@@ -263,17 +263,16 @@ internal static partial class Il2CppInteropManager
             AppDomain.CurrentDomain.AddCecilPlatformAssemblies(UnityBaseLibsDirectory);
             DownloadUnityAssemblies();
             var asmResolverAssemblies = RunCpp2Il();
-            var cecilAssemblies = new AsmToCecilConverter(asmResolverAssemblies).ConvertAll();
 
             if (DumpDummyAssemblies.Value)
             {
                 var dummyPath = Path.Combine(Paths.BepInExRootPath, "dummy");
                 Directory.CreateDirectory(dummyPath);
-                foreach (var assemblyDefinition in cecilAssemblies)
-                    assemblyDefinition.Write(Path.Combine(dummyPath, $"{assemblyDefinition.Name.Name}.dll"));
+                foreach (var assemblyDefinition in asmResolverAssemblies)
+                    assemblyDefinition.Write(Path.Combine(dummyPath, $"{assemblyDefinition.Name}.dll"));
             }
 
-            RunIl2CppInteropGenerator(cecilAssemblies);
+            RunIl2CppInteropGenerator(asmResolverAssemblies);
 
             File.WriteAllText(HashPath, ComputeHash());
         }
@@ -387,8 +386,6 @@ internal static partial class Il2CppInteropManager
                               .AddLogger(logger)
                               .AddInteropAssemblyGenerator()
                               .Run();
-
-        sourceAssemblies.Do(x => x.Dispose());
     }
 
     internal static void PreloadInteropAssemblies()
